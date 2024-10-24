@@ -1,0 +1,10 @@
+import FullScreenEditor from "@/components/FullScreenEditor";
+import React from "react";
+
+type Props = {};
+
+const EditorPage = (props: Props) => {
+  return <FullScreenEditor />;
+};
+
+export default EditorPage;
