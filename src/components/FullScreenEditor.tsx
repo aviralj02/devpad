@@ -19,10 +19,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { LANGUAGES } from "@/lib/constants";
 
-type LangType = {
-  id: string;
-  name: string;
+type Props = {
+  roomId: string;
 };
 
 const collaborators = [
@@ -85,22 +85,9 @@ const collaborators = [
   // },
 ];
 
-const languages: LangType[] = [
-  { id: "go", name: "Go" },
-  { id: "typescript", name: "TypeScript" },
-  { id: "javascript", name: "JavaScript" },
-  { id: "python", name: "Python" },
-  { id: "java", name: "Java" },
-  { id: "csharp", name: "C#" },
-  { id: "ruby", name: "Ruby" },
-  { id: "rust", name: "Rust" },
-  { id: "swift", name: "Swift" },
-  { id: "css", name: "CSS" },
-];
-
-export default function FullScreenEditor() {
+const FullScreenEditor = ({ roomId }: Props) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const [language, setLanguage] = useState<LangType>(languages[0]);
+  const [language, setLanguage] = useState<LangType>(LANGUAGES[0]);
 
   const editorRef = useRef<any>(null);
 
@@ -216,7 +203,7 @@ export default function FullScreenEditor() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[200px]">
-              {languages.map((lang) => (
+              {LANGUAGES.map((lang) => (
                 <DropdownMenuItem
                   key={lang.id}
                   onSelect={() => handleLanguageChange(lang)}
@@ -244,4 +231,6 @@ export default function FullScreenEditor() {
       </main>
     </div>
   );
-}
+};
+
+export default FullScreenEditor;
