@@ -1,97 +1,91 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { ChevronDown, Copy, LogOut, User } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import { LANGUAGES } from "@/lib/constants";
+import { socket } from "@/socket";
+import { Action } from "@/types/enums";
+import { useUser } from "@/context/UserContext";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import Sidebar from "./Sidebar";
 
 type Props = {
   roomId: string;
 };
 
-const collaborators = [
-  {
-    socketId: 1,
-    name: "Alice Johnson",
-  },
-  { socketId: 2, name: "Bob Smith" },
-  {
-    socketId: 3,
-    name: "Charlie Brown",
-  },
-  {
-    socketId: 4,
-    name: "Diana Prince",
-  },
-  {
-    socketId: 5,
-    name: "Diana Prince",
-  },
-  {
-    socketId: 6,
-    name: "Diana Prince",
-  },
-  // {
-  //   socketId: 7,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 8,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 9,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 10,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 11,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 12,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 13,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 14,
-  //   name: "Diana Prince",
-  // },
-  // {
-  //   socketId: 15,
-  //   name: "Diana Prince",
-  // },
-];
-
 const FullScreenEditor = ({ roomId }: Props) => {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [language, setLanguage] = useState<LangType>(LANGUAGES[0]);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+
+  const { userName } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const editorRef = useRef<any>(null);
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  useEffect(() => {
+    if (!userName) {
+      throw new Error("User Name is Required!");
+    }
+  }, []);
+
+  useEffect(() => {
+    socket.on("connect_error", (err) => handleErrors(err));
+    socket.on("connect_failed", (err) => handleErrors(err));
+
+    socket.emit(Action.JOIN, {
+      roomId,
+      username: userName,
+    });
+
+    socket.on(Action.JOINED, ({ clients, username: newUserName, socketId }) => {
+      if (newUserName !== userName) {
+        toast({
+          title: `${newUserName} has joined.`,
+        });
+      }
+
+      setCollaborators(clients);
+    });
+
+    socket.on(
+      Action.DISCONNECTED,
+      ({ socketId, username: leavingUserName }) => {
+        toast({
+          title: `${leavingUserName} left the room.`,
+        });
+
+        setCollaborators((prev) => {
+          return prev.filter((client) => client.socketId !== socketId);
+        });
+      }
+    );
+
+    return () => {
+      socket.disconnect();
+      socket.off(Action.JOINED);
+      socket.off(Action.DISCONNECTED);
+    };
+  }, []);
+
+  const handleErrors = (error: any) => {
+    console.log("socket error", error);
+    toast({
+      title: "Connection Failed...",
+      description: error,
+    });
+    router.replace("/");
+  };
 
   const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor;
@@ -108,91 +102,8 @@ const FullScreenEditor = ({ roomId }: Props) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
-      <aside
-        className={cn(
-          "flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out",
-          isCollapsed ? "w-16" : "w-64"
-        )}
-      >
-        <div
-          className={cn(
-            "flex h-full flex-col bg-muted",
-            isCollapsed ? "items-center" : ""
-          )}
-        >
-          <div className="flex items-center justify-between p-4">
-            <h2
-              className={cn(
-                "text-lg font-semibold",
-                isCollapsed ? "sr-only" : ""
-              )}
-            >
-              Collaborators
-            </h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              aria-label="Toggle sidebar"
-            >
-              <User className="h-5 w-5" />
-            </Button>
-          </div>
+      <Sidebar collaborators={collaborators} />
 
-          <ScrollArea className="h-full">
-            <ul className="space-y-3 p-4">
-              {collaborators.map((collaborator) => (
-                <li
-                  key={collaborator.socketId}
-                  className="flex items-center gap-3 w-full"
-                >
-                  <div className="grid place-content-center w-9 h-9 rounded-full bg-primary-foreground">
-                    {collaborator.name.slice(0, 2)}
-                  </div>
-                  {!isCollapsed && (
-                    <span className="text-sm truncate">
-                      {collaborator.name}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </ScrollArea>
-
-          <div className="p-4 border-t border-gray-700">
-            <TooltipProvider>
-              <div
-                className={cn(
-                  "flex justify-between",
-                  isCollapsed ? "flex-col gap-2" : ""
-                )}
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Copy Room ID</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <LogOut className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Leave Room</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
-          </div>
-        </div>
-      </aside>
       <main className="flex flex-1 flex-col overflow-hidden">
         <div className="bg-muted p-2 flex justify-end">
           <DropdownMenu>

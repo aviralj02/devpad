@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 type Props = {
   children: ReactNode;
@@ -17,7 +23,16 @@ const UserContext = createContext<UserContextType>({
 });
 
 export const UserProvider = ({ children }: Props) => {
-  const [userName, setUserName] = useState<string>("");
+  const [userName, setUserName] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userName") || "";
+    }
+    return "";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("userName", userName);
+  }, [userName]);
 
   return (
     <UserContext.Provider value={{ userName, setUserName }}>
