@@ -58,6 +58,10 @@ nextApp.prepare().then(async () => {
       });
     });
 
+    socket.on(Action.CODE_CHANGE, ({ roomId, code }) => {
+      socket.in(roomId).emit(Action.CODE_CHANGE, { code });
+    });
+
     socket.on("disconnecting", () => {
       const rooms = [...socket.rooms];
       rooms.forEach((roomId) => {
@@ -82,3 +86,8 @@ nextApp.prepare().then(async () => {
     console.log(`> Ready on http://localhost:${port}`);
   });
 });
+
+// 🧠 Brain dump #1:
+// io.to(room) broadcasts a message to everyone in a specific room, including the socket that triggered the event (as io is global server variable)
+// socket.in(room) sends a message to everyone else in the specified room, EXCLUDING the socket that triggered the event
+// socket.to(room) doesnt broadcast but sends including the sender

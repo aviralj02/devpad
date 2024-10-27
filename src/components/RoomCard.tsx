@@ -22,6 +22,7 @@ import { v4 } from "uuid";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
+import { toKebabCase } from "@/lib/utils";
 
 type Props = {};
 
@@ -53,7 +54,7 @@ const RoomCard = (props: Props) => {
       return;
     }
 
-    router.push(`/editor/${roomId}`);
+    router.push(`/editor/${toKebabCase(roomId)}`);
   };
 
   return (
