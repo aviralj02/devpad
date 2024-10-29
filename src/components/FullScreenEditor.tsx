@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socket } from "@/socket";
 import { Action } from "@/types/enums";
 import { useUser } from "@/context/UserContext";
@@ -19,6 +19,8 @@ const FullScreenEditor = ({ roomId }: Props) => {
   const { userName } = useUser();
   const { toast } = useToast();
   const router = useRouter();
+
+  const codeRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!userName) {
@@ -43,6 +45,13 @@ const FullScreenEditor = ({ roomId }: Props) => {
       }
 
       setCollaborators(clients);
+
+      if (codeRef.current) {
+        socket.emit(Action.SYNC_CODE, {
+          code: codeRef.current,
+          socketId,
+        });
+      }
     });
 
     socket.on(
@@ -75,9 +84,12 @@ const FullScreenEditor = ({ roomId }: Props) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
-      <Sidebar collaborators={collaborators} />
+      <Sidebar collaborators={collaborators} roomId={roomId} />
 
-      <CodeEditor roomId={roomId} />
+      <CodeEditor
+        roomId={roomId}
+        onCodeChange={(code: string) => (codeRef.current = code)}
+      />
     </div>
   );
 };

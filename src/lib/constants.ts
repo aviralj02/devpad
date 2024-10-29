@@ -1,9 +1,9 @@
 export const LANGUAGES: LangType[] = [
-  { id: "go", name: "Go" },
-  { id: "typescript", name: "TypeScript" },
   { id: "javascript", name: "JavaScript" },
-  { id: "python", name: "Python" },
+  { id: "typescript", name: "TypeScript" },
   { id: "java", name: "Java" },
+  { id: "python", name: "Python" },
+  { id: "go", name: "Go" },
   { id: "csharp", name: "C#" },
   { id: "ruby", name: "Ruby" },
   { id: "rust", name: "Rust" },

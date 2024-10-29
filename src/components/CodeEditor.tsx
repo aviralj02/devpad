@@ -16,12 +16,14 @@ import { Action } from "@/types/enums";
 
 type Props = {
   roomId: string;
+  onCodeChange: (code: string) => void;
 };
 
-const CodeEditor = ({ roomId }: Props) => {
+const CodeEditor = ({ roomId, onCodeChange }: Props) => {
   const [language, setLanguage] = useState<LangType>(LANGUAGES[0]);
 
   const editorRef = useRef<any>(null);
+  const initialCodeRef = useRef<string | null>(null);
 
   // 🧠 Brain Dump #2:
   // Avoids running multiple setValue concurrently resulting in infinite loop,
@@ -31,11 +33,22 @@ const CodeEditor = ({ roomId }: Props) => {
   const handleCodeChange = () => {
     if (isUpdatingFromRemote.current) return;
     const newCode = editorRef.current?.getValue();
-    socket.emit(Action.CODE_CHANGE, { roomId, code: newCode });
+    onCodeChange(newCode);
+
+    socket.emit(Action.CODE_CHANGE, {
+      roomId,
+      code: newCode,
+    });
   };
 
   const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor;
+
+    if (initialCodeRef.current) {
+      editorRef.current.setValue(initialCodeRef.current);
+      initialCodeRef.current = null;
+    }
+
     editorRef.current.onDidChangeModelContent(handleCodeChange);
   };
 
@@ -45,10 +58,19 @@ const CodeEditor = ({ roomId }: Props) => {
 
       if (currentCode !== syncedCode) {
         isUpdatingFromRemote.current = true;
-        editorRef.current.setValue(syncedCode);
+        editorRef.current?.setValue(syncedCode);
         isUpdatingFromRemote.current = false;
       }
     });
+
+    socket.on(Action.SYNC_CODE, ({ code: initialCode }) => {
+      initialCodeRef.current = initialCode;
+    });
+
+    return () => {
+      socket.off(Action.CODE_CHANGE);
+      socket.off(Action.SYNC_CODE);
+    };
   }, []);
 
   return (
@@ -57,7 +79,7 @@ const CodeEditor = ({ roomId }: Props) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-[200px] justify-between">
-              {language.name}
+              {language?.name}
               <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>

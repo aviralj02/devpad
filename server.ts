@@ -62,6 +62,10 @@ nextApp.prepare().then(async () => {
       socket.in(roomId).emit(Action.CODE_CHANGE, { code });
     });
 
+    socket.on(Action.SYNC_CODE, ({ socketId, code }) => {
+      io.to(socketId).emit(Action.SYNC_CODE, { code });
+    });
+
     socket.on("disconnecting", () => {
       const rooms = [...socket.rooms];
       rooms.forEach((roomId) => {

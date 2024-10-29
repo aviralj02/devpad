@@ -11,15 +11,36 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Copy, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 type Props = {
   collaborators: Collaborator[];
+  roomId: string;
 };
 
-const Sidebar = ({ collaborators }: Props) => {
+const Sidebar = ({ collaborators, roomId }: Props) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
+  const { toast } = useToast();
+
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+
+  const copyRoomId = async () => {
+    try {
+      await navigator.clipboard.writeText(roomId);
+      toast({
+        title: "Copied Successfully!",
+        description: "Room ID has been copied to your clipboard.",
+      });
+    } catch (error) {
+      toast({
+        title: "Could not copy Room ID",
+        variant: "destructive",
+      });
+
+      console.log(error);
+    }
+  };
 
   return (
     <aside
@@ -83,7 +104,7 @@ const Sidebar = ({ collaborators }: Props) => {
             >
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={copyRoomId}>
                     <Copy className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -94,7 +115,13 @@ const Sidebar = ({ collaborators }: Props) => {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      window.location.href = "/";
+                    }}
+                  >
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
