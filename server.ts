@@ -66,6 +66,14 @@ nextApp.prepare().then(async () => {
       io.to(socketId).emit(Action.SYNC_CODE, { code });
     });
 
+    socket.on(Action.LANG_CHANGE, ({ roomId, lang }) => {
+      socket.in(roomId).emit(Action.LANG_CHANGE, { lang });
+    });
+
+    socket.on(Action.SYNC_LANG, ({ socketId, lang }) => {
+      io.to(socketId).emit(Action.SYNC_LANG, { lang });
+    });
+
     socket.on("disconnecting", () => {
       const rooms = [...socket.rooms];
       rooms.forEach((roomId) => {

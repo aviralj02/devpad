@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Sidebar from "./Sidebar";
 import CodeEditor from "./CodeEditor";
+import { LANGUAGES } from "@/lib/constants";
 
 type Props = {
   roomId: string;
@@ -21,6 +22,7 @@ const FullScreenEditor = ({ roomId }: Props) => {
   const router = useRouter();
 
   const codeRef = useRef<string | null>(null);
+  const langRef = useRef<LangType>(LANGUAGES[0]);
 
   useEffect(() => {
     if (!userName) {
@@ -49,6 +51,12 @@ const FullScreenEditor = ({ roomId }: Props) => {
       if (codeRef.current) {
         socket.emit(Action.SYNC_CODE, {
           code: codeRef.current,
+          socketId,
+        });
+      }
+      if (langRef.current) {
+        socket.emit(Action.SYNC_LANG, {
+          lang: langRef.current.id,
           socketId,
         });
       }
@@ -89,6 +97,7 @@ const FullScreenEditor = ({ roomId }: Props) => {
       <CodeEditor
         roomId={roomId}
         onCodeChange={(code: string) => (codeRef.current = code)}
+        onLangChange={(lang: LangType) => (langRef.current = lang)}
       />
     </div>
   );

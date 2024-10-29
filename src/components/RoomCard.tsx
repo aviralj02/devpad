@@ -65,12 +65,12 @@ const RoomCard = (props: Props) => {
             <Image
               src="/devpad-icon.svg"
               alt="devpad-image"
-              width="55"
-              height="55"
+              width="50"
+              height="50"
             />
           </div>
           <div className="flex flex-col space-y-1 ">
-            <CardTitle className="sm:text-2xl text-lg">Devpad</CardTitle>
+            <CardTitle className="sm:text-xl text-lg">Devpad</CardTitle>
             <CardDescription className="sm:text-sm text-xs">
               Where Developers Collaborate.
             </CardDescription>
@@ -92,6 +92,7 @@ const RoomCard = (props: Props) => {
                 handleSubmit();
               }
             }}
+            className="sm:text-sm text-xs"
           />
           <Input
             type="text"
@@ -106,6 +107,7 @@ const RoomCard = (props: Props) => {
                 handleSubmit();
               }
             }}
+            className="sm:text-sm text-xs"
           />
         </div>
       </CardContent>
@@ -113,7 +115,7 @@ const RoomCard = (props: Props) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild onClick={generateRoomId}>
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="p-0 sm:text-sm text-xs">
                 new room?
               </Button>
             </TooltipTrigger>
@@ -123,7 +125,11 @@ const RoomCard = (props: Props) => {
           </Tooltip>
         </TooltipProvider>
 
-        <Button variant="secondary" onClick={handleSubmit}>
+        <Button
+          variant="secondary"
+          onClick={handleSubmit}
+          className="sm:text-sm text-xs"
+        >
           Join
         </Button>
       </CardFooter>

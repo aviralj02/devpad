@@ -17,9 +17,10 @@ import { Action } from "@/types/enums";
 type Props = {
   roomId: string;
   onCodeChange: (code: string) => void;
+  onLangChange: (lang: LangType) => void;
 };
 
-const CodeEditor = ({ roomId, onCodeChange }: Props) => {
+const CodeEditor = ({ roomId, onCodeChange, onLangChange }: Props) => {
   const [language, setLanguage] = useState<LangType>(LANGUAGES[0]);
 
   const editorRef = useRef<any>(null);
@@ -38,6 +39,16 @@ const CodeEditor = ({ roomId, onCodeChange }: Props) => {
     socket.emit(Action.CODE_CHANGE, {
       roomId,
       code: newCode,
+    });
+  };
+
+  const handleLangChange = (lang: LangType) => {
+    setLanguage(lang);
+    onLangChange(lang);
+
+    socket.emit(Action.LANG_CHANGE, {
+      roomId,
+      lang: lang.id,
     });
   };
 
@@ -67,9 +78,25 @@ const CodeEditor = ({ roomId, onCodeChange }: Props) => {
       initialCodeRef.current = initialCode;
     });
 
+    socket.on(Action.LANG_CHANGE, ({ lang: syncedLang }) => {
+      const newLang = LANGUAGES.find((pl: LangType) => syncedLang === pl.id)!;
+      setLanguage(newLang);
+      onLangChange(newLang);
+    });
+
+    socket.on(Action.SYNC_LANG, ({ lang: initialLang }) => {
+      const newLang = LANGUAGES.find((pl: LangType) => initialLang === pl.id)!;
+      setLanguage(newLang);
+      onLangChange(newLang);
+
+      console.log(initialLang);
+    });
+
     return () => {
       socket.off(Action.CODE_CHANGE);
       socket.off(Action.SYNC_CODE);
+      socket.off(Action.LANG_CHANGE);
+      socket.off(Action.SYNC_LANG);
     };
   }, []);
 
@@ -87,7 +114,7 @@ const CodeEditor = ({ roomId, onCodeChange }: Props) => {
             {LANGUAGES.map((lang) => (
               <DropdownMenuItem
                 key={lang.id}
-                onSelect={() => setLanguage(lang)}
+                onSelect={() => handleLangChange(lang)}
               >
                 {lang.name}
               </DropdownMenuItem>
@@ -98,7 +125,7 @@ const CodeEditor = ({ roomId, onCodeChange }: Props) => {
       <div className="flex-1 overflow-hidden">
         <Editor
           height="100%"
-          language={language.id}
+          language={language?.id}
           defaultValue={`// Start Writing...`}
           theme="vs-dark"
           options={{
