@@ -7,7 +7,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
-import React, { ChangeEvent, KeyboardEvent, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { Button } from "./ui/button";
 import {
   Card,
