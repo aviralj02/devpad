@@ -11,7 +11,7 @@ const app: Express = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000/", "https://devpad-inky.vercel.app/"],
+    origin: ["https://devpad-inky.vercel.app/"],
     credentials: true,
   })
 );
@@ -42,7 +42,7 @@ io.on("connection", (socket: Socket) => {
   console.log("connection");
   socket.emit("status", "Hello from Socket.io");
 
-  socket.on("join", ({ roomId, username }) => {
+  socket.on(Action.JOIN, ({ roomId, username }) => {
     userSocketMap[socket.id] = username;
     socket.join(roomId);
 
