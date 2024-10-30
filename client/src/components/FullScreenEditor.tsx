@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Sidebar from "./Sidebar";
 import CodeEditor from "./CodeEditor";
-import { LANGUAGES } from "@/lib/constants";
 
 type Props = {
   roomId: string;
@@ -22,7 +21,7 @@ const FullScreenEditor = ({ roomId }: Props) => {
   const router = useRouter();
 
   const codeRef = useRef<string | null>(null);
-  const langRef = useRef<LangType>(LANGUAGES[0]);
+  const langRef = useRef<LangType | null>(null);
 
   useEffect(() => {
     if (!userName) {

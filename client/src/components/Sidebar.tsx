@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Copy, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "./ui/skeleton";
 
 type Props = {
   collaborators: Collaborator[];
@@ -76,21 +77,34 @@ const Sidebar = ({ collaborators, roomId }: Props) => {
 
         <ScrollArea className="h-full">
           <ul className="space-y-3 p-4">
-            {collaborators.map((collaborator) => (
-              <li
-                key={collaborator.socketId}
-                className="flex items-center gap-3 w-full"
-              >
-                <div className="grid place-content-center w-9 h-9 rounded-full bg-primary-foreground">
-                  {collaborator.username.slice(0, 2)}
-                </div>
-                {!isCollapsed && (
-                  <span className="text-sm truncate">
-                    {collaborator.username}
-                  </span>
-                )}
-              </li>
-            ))}
+            {collaborators.length !== 0
+              ? collaborators.map((collaborator) => (
+                  <li
+                    key={collaborator.socketId}
+                    className="flex items-center gap-3 w-full"
+                  >
+                    <div className="grid place-content-center w-9 h-9 rounded-full bg-primary-foreground">
+                      {collaborator.username.slice(0, 2)}
+                    </div>
+                    {!isCollapsed && (
+                      <span className="text-sm truncate">
+                        {collaborator.username}
+                      </span>
+                    )}
+                  </li>
+                ))
+              : Array(4)
+                  .fill(null)
+                  .map((_, index) => (
+                    <li key={index} className="flex items-center space-x-4">
+                      <Skeleton className="w-6 h-6 rounded-full" />
+                      {!isCollapsed && (
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-40" />
+                        </div>
+                      )}
+                    </li>
+                  ))}
           </ul>
         </ScrollArea>
 

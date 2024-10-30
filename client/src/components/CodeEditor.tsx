@@ -9,7 +9,7 @@ import {
 } from "./ui/dropdown-menu";
 import { LANGUAGES } from "@/lib/constants";
 import { Editor, OnMount } from "@monaco-editor/react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { socket } from "@/socket";
 import { Action } from "@/types/enums";
@@ -24,7 +24,6 @@ const CodeEditor = ({ roomId, onCodeChange, onLangChange }: Props) => {
   const [language, setLanguage] = useState<LangType>(LANGUAGES[0]);
 
   const editorRef = useRef<any>(null);
-  const initialCodeRef = useRef<string | null>(null);
 
   // 🧠 Brain Dump #2:
   // Avoids running multiple setValue concurrently resulting in infinite loop,
@@ -55,11 +54,6 @@ const CodeEditor = ({ roomId, onCodeChange, onLangChange }: Props) => {
   const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor;
 
-    if (initialCodeRef.current) {
-      editorRef.current.setValue(initialCodeRef.current);
-      initialCodeRef.current = null;
-    }
-
     editorRef.current.onDidChangeModelContent(handleCodeChange);
   };
 
@@ -75,7 +69,7 @@ const CodeEditor = ({ roomId, onCodeChange, onLangChange }: Props) => {
     });
 
     socket.on(Action.SYNC_CODE, ({ code: initialCode }) => {
-      initialCodeRef.current = initialCode;
+      editorRef.current?.setValue(initialCode);
     });
 
     socket.on(Action.LANG_CHANGE, ({ lang: syncedLang }) => {
@@ -88,8 +82,6 @@ const CodeEditor = ({ roomId, onCodeChange, onLangChange }: Props) => {
       const newLang = LANGUAGES.find((pl: LangType) => initialLang === pl.id)!;
       setLanguage(newLang);
       onLangChange(newLang);
-
-      console.log(initialLang);
     });
 
     return () => {
@@ -106,7 +98,13 @@ const CodeEditor = ({ roomId, onCodeChange, onLangChange }: Props) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-[200px] justify-between">
-              {language?.name}
+              {language ? (
+                language?.name
+              ) : (
+                <span>
+                  <Loader2 className="w-4 h-auto animate-spin" />
+                </span>
+              )}
               <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
