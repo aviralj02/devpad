@@ -65,7 +65,7 @@ yarn dev
 ### Deployment
 
 - **Frontend**: [Vercel](https://vercel.com)
-- **Backend**: [Render](https://render.com/)
+- **Backend**: [Koyeb](https://www.koyeb.com/)
 
 ### Production
 
