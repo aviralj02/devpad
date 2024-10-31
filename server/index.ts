@@ -98,6 +98,8 @@ server.listen(port, () => {
   console.log(`> Server running on http://localhost:${port}`);
 });
 
+export default app;
+
 // 🧠 Brain dump #1:
 // io.to(room) broadcasts a message to everyone in a specific room, including the socket that triggered the event (as io is global server variable)
 // socket.in(room) sends a message to everyone else in the specified room, EXCLUDING the socket that triggered the event
